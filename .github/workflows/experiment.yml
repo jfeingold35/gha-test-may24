@@ -22,7 +22,7 @@ jobs:
           if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
             RELEASE_TYPE=${{ github.event.inputs.release-type }}
           # The regularly scheduled releases are always minor.
-          else; do
+          else
             RELEASE_TYPE=minor
           fi
           # Increment the version as needed
