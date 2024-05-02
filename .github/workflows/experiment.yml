@@ -16,7 +16,7 @@ jobs:
   create-release-branch:
     runs-on: ubuntu-latest
     steps:
-      - run: actions/checkout@v4
+      - uses: actions/checkout@v4
       - run: |
           # A workflow dispatch lets the user specify what release type they want.
           if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
