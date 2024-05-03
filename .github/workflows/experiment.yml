@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      branch-name: ${{ steps.create-branch.branch_name }}
+      branch-name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
       - uses: actions/checkout@v4
       - name: Increment version
