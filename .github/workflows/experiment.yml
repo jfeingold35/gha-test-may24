@@ -18,6 +18,7 @@ jobs:
     outputs:
       branch-name: ${{ steps.create-branch.branch_name }}
     steps:
+      - uses: actions/checkout@v4
       - name: Increment version
         run: |
           # A workflow dispatch event lets the user specify what release type they want.
