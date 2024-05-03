@@ -9,18 +9,18 @@ on:
           - major
           - minor
           - patch
-  schedule:
-    - cron: "25 19 * * *"
 
 jobs:
-  create-release-branch:
+  dothething:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      branch-name: ${{ steps.create-branch.branch_name }}
     steps:
-      - uses: actions/checkout@v4
-      - run: |
-          # A workflow dispatch lets the user specify what release type they want.
+      - name: Increment version
+        run: |
+          # A workflow dispatch event lets the user specify what release type they want.
           if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
             RELEASE_TYPE=${{ github.event.inputs.release-type }}
           # The regularly scheduled releases are always minor.
@@ -29,14 +29,19 @@ jobs:
           fi
           # Increment the version as needed
           npm --no-git-tag-version version $RELEASE_TYPE
-          # Get the new version value
-          NEW_VERSION=$(jq -r ".version" package.json)
-          # Create the new branch with the name `release-x.y.z`
-          git checkout -b release-$NEW_VERSION
-          # Add the new package.json
           git add package.json
-          # Create some user information
-          git config --global user.name "mrroboto"
-          git config --global user.email "botbotbot@bot.bot"
-          git commit -m "Incrementing version for $NEW_VERSION release"
+      - name: Checkout new branch, commit, push
+        id: create-branch
+        run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          git checkout -b release-$NEW_VERSION
+          git config --global user.name "botty mcbotface"
+          git config --global user.email "bottymcbotface@imabot.com"
+          git commit -m "doing the thing"
           git push --set-upstream origin release-$NEW_VERSION
+          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+  fire-flow:
+    needs: dothething
+    uses: ./.github/workflows/fire-flow.yml
+    with:
+      target-branch: ${{ needs.dothething.outputs.branch-name }}
