@@ -41,6 +41,11 @@ jobs:
           git commit -m "doing the thing"
           git push --set-upstream origin release-$NEW_VERSION
           echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+  log-arg:
+    runs-on: ubuntu-latest
+    needs: dothething
+    steps:
+      - run: echo ${{ needs.dothething.outputs.branch-name }}
   fire-flow:
     needs: dothething
     uses: ./.github/workflows/fired-flow.yml
