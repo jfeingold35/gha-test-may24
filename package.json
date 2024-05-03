@@ -2,5 +2,10 @@
   "version": "0.0.1",
   "scripts": {
     "logstr": "cat package.json"
-  }
+  },
+  "name": "gha-test-may24",
+  "description": "beep",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
 }
