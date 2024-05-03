@@ -5,4 +5,4 @@ on:
 
 jobs:
   fire-flow:
-    uses: ./.github/workflows/run-tests.yml
+    uses: ./.github/workflows/fired-flow.yml

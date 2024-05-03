@@ -42,6 +42,6 @@ jobs:
           echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
   fire-flow:
     needs: dothething
-    uses: ./.github/workflows/fire-flow.yml
+    uses: ./.github/workflows/fired-flow.yml
     with:
       target-branch: ${{ needs.dothething.outputs.branch-name }}
