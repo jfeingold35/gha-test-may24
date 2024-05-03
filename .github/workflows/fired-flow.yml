@@ -6,7 +6,7 @@ on:
         description: what branch should be used
         required: false
         type: string
-        default: ${{ github.ref_name }}
+        default: ${{ github.sha }}
 
 jobs:
   do-the-thing:
