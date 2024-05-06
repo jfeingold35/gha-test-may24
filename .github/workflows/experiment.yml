@@ -9,6 +9,8 @@ on:
           - major
           - minor
           - patch
+  schedule:
+    - cron: "39 14 * * *"
 
 jobs:
   verify-should-run:
