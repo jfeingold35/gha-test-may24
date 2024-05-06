@@ -10,7 +10,7 @@ on:
           - minor
           - patch
   schedule:
-    - cron: "39 14 * * *"
+    - cron: "41 13 * * *"
 
 jobs:
   verify-should-run:
