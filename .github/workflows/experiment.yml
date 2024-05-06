@@ -20,7 +20,7 @@ jobs:
     steps:
       - id: main
         run: |
-          [[ "${{ github.event_name }}" = "workflow_dispatch" ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" && exit 0
+          [[ "${{ github.event_name }}" = "workflow_dispatch" ]] && echo "should_run=true" >> "$GITHUB_OUTPUT" && exit 0
           TODAY_DOW=$(date -u +%u)
           [[ $TODAY_DOW != 1 ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" && exit 0
           NEXT_RELEASE_DATE=$(date -u -v1d -v+1m -v-1d -v-tue +%d)
