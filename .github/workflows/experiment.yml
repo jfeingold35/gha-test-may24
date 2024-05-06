@@ -14,7 +14,7 @@ on:
 
 jobs:
   verify-should-run:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     outputs:
       should-run: ${{ steps.main.outputs.should_run }}
     steps:
