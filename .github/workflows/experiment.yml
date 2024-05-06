@@ -11,43 +11,64 @@ on:
           - patch
 
 jobs:
-  dothething:
+  verify-should-run:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     outputs:
-      branch-name: ${{ steps.create-branch.outputs.branch_name }}
+      should-run: ${{ steps.main.outputs.should_run }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Increment version
+      - id: main
         run: |
-          # A workflow dispatch event lets the user specify what release type they want.
-          if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
-            RELEASE_TYPE=${{ github.event.inputs.release-type }}
-          # The regularly scheduled releases are always minor.
-          else
-            RELEASE_TYPE=minor
-          fi
-          # Increment the version as needed
-          npm --no-git-tag-version version $RELEASE_TYPE
-          git add package.json
-      - name: Checkout new branch, commit, push
-        id: create-branch
-        run: |
-          NEW_VERSION=$(jq -r ".version" package.json)
-          git checkout -b release-$NEW_VERSION
-          git config --global user.name "botty mcbotface"
-          git config --global user.email "bottymcbotface@imabot.com"
-          git commit -m "doing the thing"
-          git push --set-upstream origin release-$NEW_VERSION
-          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
-  log-arg:
+          [[ "${{ github.event_name }}" = "workflow_dispatch" ]] && echo "should_run=true" >> "$GITHUB_OUTPUT" && exit 0
+          TODAY_DOW=$(date -u +%u)
+          [[ $TODAY_DOW != 1 ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" && exit 0
+          NEXT_RELEASE_DATE=$(date -u -v1d -v+1m -v-1d -v-tue +%d)
+          UPCOMING_TUESDAY_DATE=$(date -u -v+tue +%d)
+          [[ $NEXT_RELEASE_DATE != $UPCOMING_TUESDAY_DATE ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" || echo "should_run=true" >> "$GITHUB_OUTPUT"
+  do-the-thing:
     runs-on: ubuntu-latest
-    needs: dothething
+    needs: verify-should-run
+    if: ${{ needs.verify-should-run.outputs.should-run }}
     steps:
-      - run: echo ${{ needs.dothething.outputs.branch-name }}
-  fire-flow:
-    needs: dothething
-    uses: ./.github/workflows/fired-flow.yml
-    with:
-      target-branch: ${{ needs.dothething.outputs.branch-name }}
+      - run: echo beep
+#
+#  dothething:
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: write
+#    outputs:
+#      branch-name: ${{ steps.create-branch.outputs.branch_name }}
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Increment version
+#        run: |
+#          # A workflow dispatch event lets the user specify what release type they want.
+#          if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
+#            RELEASE_TYPE=${{ github.event.inputs.release-type }}
+#          # The regularly scheduled releases are always minor.
+#          else
+#            RELEASE_TYPE=minor
+#          fi
+#          # Increment the version as needed
+#          npm --no-git-tag-version version $RELEASE_TYPE
+#          git add package.json
+#      - name: Checkout new branch, commit, push
+#        id: create-branch
+#        run: |
+#          NEW_VERSION=$(jq -r ".version" package.json)
+#          git checkout -b release-$NEW_VERSION
+#          git config --global user.name "botty mcbotface"
+#          git config --global user.email "bottymcbotface@imabot.com"
+#          git commit -m "doing the thing"
+#          git push --set-upstream origin release-$NEW_VERSION
+#          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+#  log-arg:
+#    runs-on: ubuntu-latest
+#    needs: dothething
+#    steps:
+#      - run: echo ${{ needs.dothething.outputs.branch-name }}
+#  fire-flow:
+#    needs: dothething
+#    uses: ./.github/workflows/fired-flow.yml
+#    with:
+#      target-branch: ${{ needs.dothething.outputs.branch-name }}
+#
