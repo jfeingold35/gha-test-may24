@@ -9,78 +9,38 @@ on:
           - major
           - minor
           - patch
-  schedule:
-    - cron: "47 14 * * *"
 
 jobs:
-  verify-should-run:
-    runs-on: macos-latest
+  create-release-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
-      should-run: ${{ steps.main.outputs.should_run }}
+      branch-name: ${{ steps.create-branch.branch_name }}
     steps:
-      - id: main
+      # Checkout `dev`
+      - uses: actions/checkout@v4
+      # Increment version
+      - name: Increment version
         run: |
-          # `date -u` returns UTC datetime, and `%u` formats the output to be the day of the week, with 1 being Monday,
-          # 2 being Tuesday, etc.
-          TODAY_DOW=$(date -u +%u)
-          # This `date` expression returns the last Tuesday of the month, which is our Release Day. %d formats the output
-          # as the day of the month (1-31).
-          NEXT_RELEASE_DATE=$(date -u -v1d -v+1m -v-1d -v-tue -v-3w +%d)
-          # This `date` expression returns next Tuesday, and `%d` formats the output as the day of the month (1-31).
-          NEXT_TUESDAY_DATE=$(date -u -v+tue +%d)
-          # If the workflow wasn't manually triggered, then it should only be allowed to run to completion on the Friday
-          # before Release Day.
-          [[ $TODAY_DOW != 1 || $NEXT_RELEASE_DATE != $NEXT_TUESDAY_DATE ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" || echo "should_run=true" >> "$GITHUB_OUTPUT"
-  do-the-thing:
-    runs-on: ubuntu-latest
-    needs: verify-should-run
-    if: ${{ needs.verify-should-run.outputs.should-run == 'true'}}
-    steps:
-      - run: echo beep
-  do-the-next-thing:
-    runs-on: ubuntu-latest
-    needs: do-the-thing
-    steps:
-      - run: echo beep
-#
-#  dothething:
-#    runs-on: ubuntu-latest
-#    permissions:
-#      contents: write
-#    outputs:
-#      branch-name: ${{ steps.create-branch.outputs.branch_name }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Increment version
-#        run: |
-#          # A workflow dispatch event lets the user specify what release type they want.
-#          if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
-#            RELEASE_TYPE=${{ github.event.inputs.release-type }}
-#          # The regularly scheduled releases are always minor.
-#          else
-#            RELEASE_TYPE=minor
-#          fi
-#          # Increment the version as needed
-#          npm --no-git-tag-version version $RELEASE_TYPE
-#          git add package.json
-#      - name: Checkout new branch, commit, push
-#        id: create-branch
-#        run: |
-#          NEW_VERSION=$(jq -r ".version" package.json)
-#          git checkout -b release-$NEW_VERSION
-#          git config --global user.name "botty mcbotface"
-#          git config --global user.email "bottymcbotface@imabot.com"
-#          git commit -m "doing the thing"
-#          git push --set-upstream origin release-$NEW_VERSION
-#          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
-#  log-arg:
-#    runs-on: ubuntu-latest
-#    needs: dothething
-#    steps:
-#      - run: echo ${{ needs.dothething.outputs.branch-name }}
-#  fire-flow:
-#    needs: dothething
-#    uses: ./.github/workflows/fired-flow.yml
-#    with:
-#      target-branch: ${{ needs.dothething.outputs.branch-name }}
-#
+          # A workflow dispatch event lets the user specify what release type they want.
+          if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
+            RELEASE_TYPE=${{ github.event.inputs.release-type }}
+          # The regularly scheduled releases are always minor.
+          else
+            RELEASE_TYPE=minor
+          fi
+          # Increment the version as needed
+          npm --no-git-tag-version version $RELEASE_TYPE
+          git add package.json
+      # Create the new branch
+      - name: Checkout new branch, commit, push
+        id: create-branch
+        run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          git checkout -b release-$NEW_VERSION
+          git config --global user.name "botty-mc-botface"
+          git config --global user.email "botbotbot@imabot.bot"
+          git commit -m "Incrementing version for $NEW_VERSION release"
+          git push --set-upstream origin release-$NEW_VERSION
+          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"

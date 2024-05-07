@@ -1,0 +1,30 @@
+name: publish-release
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: tag to be published
+        type: string
+        required: true
+
+jobs:
+  pretend-to-release:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "definitely did a release"
+  merge-main-to-dev:
+    needs: pretend-to-release
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          git config --global user.name "botty-mc-botface"
+          git config --global user.email "botbotbot@imabot.bot"
+          git checkout main
+          git pull
+          git checkout dev
+          git pull
+          git pull origin main --rebase
+          git push --force
+          
