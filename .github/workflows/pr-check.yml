@@ -1,8 +1,0 @@
-name: pr-check
-on:
-  pull_request:
-    types: [edited, opened, reopened, synchronize]
-
-jobs:
-  fire-flow:
-    uses: ./.github/workflows/fired-flow.yml
