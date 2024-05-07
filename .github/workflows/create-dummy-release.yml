@@ -1,0 +1,38 @@
+name: create-dummy-release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  create-github-release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Get version property
+        id: get-version-property
+        run: |
+          PACKAGE_VERSION=$(jq -r ".version" package.json)
+          echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Create github release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get-version-property.outputs.package_version }}
+          name: v${{ steps.get-version-property.outputs.package_version }}
+          body: |
+            asdfasdf
+            asdfasdf
+          token: ${{ secrets.GITHUB_TOKEN }}
+          make_latest: true
+          
