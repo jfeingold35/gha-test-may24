@@ -22,6 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
+          git fetch --all
           git checkout main
           git config --global user.name "botty-mc-botface"
           git config --global user.email "botbotbot@imabot.bot"
