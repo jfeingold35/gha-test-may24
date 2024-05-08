@@ -14,21 +14,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "definitely did a release"
-  merge-main-to-dev:
-    needs: pretend-to-release
+  create-main-to-dev-pr:
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-    runs-on: ubuntu-latest
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - run: |
-          git fetch --all
-          git checkout main
-          git config --global user.name "botty-mc-botface"
-          git config --global user.email "botbotbot@imabot.bot"
-          git pull
-          git checkout dev
-          git pull
-          git pull origin main --rebase
-          git push --force
-          
+      - run: gh pr create -B dev -H main --title "Filler name, change name manually"
+
+
+
+
+#  merge-main-to-dev:
+#    needs: pretend-to-release
+#    permissions:
+#      contents: write
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - run: |
+#          git fetch --all
+#          git checkout main
+#          git config --global user.name "botty-mc-botface"
+#          git config --global user.email "botbotbot@imabot.bot"
+#          git pull
+#          git checkout dev
+#          git pull
+#          git pull origin main --rebase
+#          git push --force
+#
+#
