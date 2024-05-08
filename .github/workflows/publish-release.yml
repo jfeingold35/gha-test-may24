@@ -23,7 +23,16 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+<<<<<<< Updated upstream
       - run: gh pr create -B dev -H main --title "Filler name, change name manually" --body "Merging main into dev after release"
+=======
+<<<<<<< Updated upstream
+      - run: gh pr create -B dev -H main --title "Filler name, change name manually"
+=======
+      - uses: actions/checkout@v4
+      - run: gh pr create -B dev -H main --title "Filler name, change name manually" --body "Merging main into dev after release"
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 
 
