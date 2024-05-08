@@ -18,6 +18,7 @@ jobs:
     needs: pretend-to-release
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - run: |
           git config --global user.name "botty-mc-botface"
           git config --global user.email "botbotbot@imabot.bot"
