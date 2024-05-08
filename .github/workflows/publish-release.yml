@@ -16,6 +16,8 @@ jobs:
       - run: echo "definitely did a release"
   merge-main-to-dev:
     needs: pretend-to-release
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
