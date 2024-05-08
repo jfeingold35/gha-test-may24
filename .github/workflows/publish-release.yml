@@ -16,12 +16,15 @@ jobs:
       - run: echo "definitely did a release"
   merge-main-to-dev:
     needs: pretend-to-release
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - run: |
+          git checkout main
           git config --global user.name "botty-mc-botface"
           git config --global user.email "botbotbot@imabot.bot"
-          git checkout main
           git pull
           git checkout dev
           git pull

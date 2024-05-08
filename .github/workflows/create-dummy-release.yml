@@ -26,13 +26,11 @@ jobs:
           echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
       - name: Create github release
         uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.get-version-property.outputs.package_version }}
           name: v${{ steps.get-version-property.outputs.package_version }}
           body: |
             asdfasdf
             asdfasdf
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GHA_PAT }}
           make_latest: true
