@@ -8,3 +8,4 @@ I am modifying the README a fourth time
 I am modifying the README a seventh time (in dev)
 I am modifying the README a fifth time
 I am modifying the README a sixth time
+I am modifying the README a seventh time (in the release branch)
