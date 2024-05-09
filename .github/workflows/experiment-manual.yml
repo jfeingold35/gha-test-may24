@@ -12,7 +12,7 @@ jobs:
   create-test-pr:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: $secrets.GHA_PAT
+      GH_TOKEN: ${{ secrets.GHA_PAT }}
     permissions:
       contents: write
     steps:
