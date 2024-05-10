@@ -20,6 +20,12 @@ jobs:
     steps:
       # Checkout `dev`
       - uses: actions/checkout@v4
+      - name: Import key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_KEY }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
       # Increment version
       - name: Increment version
         run: |
@@ -39,8 +45,8 @@ jobs:
         run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           git checkout -b release-$NEW_VERSION
-          git config --global user.name "botty-mc-botface"
-          git config --global user.email "botbotbot@imabot.bot"
-          git commit -m "Incrementing version for $NEW_VERSION release"
+          git config --global user.name "jfpd35"
+          git config --global user.email "jfpd35@gmail.com"
+          git commit -S -m "Incrementing version for $NEW_VERSION release"
           git push --set-upstream origin release-$NEW_VERSION
           echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
