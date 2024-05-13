@@ -45,6 +45,7 @@ jobs:
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
           NEW_PACKAGE_JSON=$(cat package.json | base64)
           NEW_PACKAGE_JSON=$(echo -n $NEW_PACKAGE_JSON)
+          NEW_PACKAGE_JSON="ewogICJ2ZXJzaW9uIjogIjAuMS4wIiwKICAic2NyaXB0cyI6IHsKICAgICJsb2dzdHIiOiAiY2F0IHBhY2thZ2UuanNvbiIKICB9LAogICJuYW1lIjogImdoYS10ZXN0LW1heTI0IiwKICAiZGVzY3JpcHRpb24iOiAiYmVlcCIsCiAgIm1haW4iOiAiaW5kZXguanMiLAogICJhdXRob3IiOiAiIiwKICAibGljZW5zZSI6ICJJU0MiCn0K"
           gh api graphql -F message="$MESSAGE" -F eho=`git rev-parse HEAD` -F branch="$BRANCH" -F newpackage="$NEW_PACKAGE_JSON" -f query='
           mutation ($message: String!, $eho: GitObjectID!, $newpackage: Base64String!, $branch: String!) {
             createCommitOnBranch(input: {
