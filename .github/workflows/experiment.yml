@@ -43,8 +43,9 @@ jobs:
           NEW_VERSION=$(jq -r ".version" package.json)
           MESSAGE="Incrementing version for v$NEW_VERSION release"
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          NEW_PACKAGE_JSON=$(cat package.json | base64)
-          gh api graphql -F message="$MESSAGE" -F eho=`git rev-parse HEAD` -F branch="$BRANCH" -F newpackage=$NEW_PACKAGE_JSON -f query='
+          NEW_PACKAGE_JSON=$(cat package.json)
+          NEW_PACKAGE_JSON=$(echo -n $NEW_PACKAGE_JSON | base64)
+          gh api graphql -F message="$MESSAGE" -F eho=`git rev-parse HEAD` -F branch="$BRANCH" -F newpackage="$NEW_PACKAGE_JSON" -f query='
           mutation ($message: String!, $eho: GitObjectID!, $newpackage: Base64String!, $branch: String!) {
             createCommitOnBranch(input: {
               branch: {
