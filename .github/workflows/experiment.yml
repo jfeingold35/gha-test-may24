@@ -18,35 +18,51 @@ jobs:
     outputs:
       branch-name: ${{ steps.create-branch.branch_name }}
     steps:
-      # Checkout `dev`
+      # checkout dev
       - uses: actions/checkout@v4
-      - name: Import key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_KEY }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
       # Increment version
-      - name: Increment version
-        run: |
-          # A workflow dispatch event lets the user specify what release type they want.
+      - run: |
           if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
             RELEASE_TYPE=${{ github.event.inputs.release-type }}
-          # The regularly scheduled releases are always minor.
           else
             RELEASE_TYPE=minor
           fi
-          # Increment the version as needed
           npm --no-git-tag-version version $RELEASE_TYPE
-          git add package.json
-      # Create the new branch
-      - name: Checkout new branch, commit, push
-        id: create-branch
-        run: |
+      # Create the new branch on Github as a direct clone of `dev`
+      - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
+          git stash
+          git checkout dev
+          git pull
           git checkout -b release-$NEW_VERSION
-          git config --global user.name "jfpd35"
-          git config --global user.email "jfpd35@gmail.com"
-          git commit -S -m "Incrementing version for $NEW_VERSION release"
           git push --set-upstream origin release-$NEW_VERSION
-          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          git stash pop
+      - run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          MESSAGE="Incrementing version for v$NEW_VERSION release"
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          NEW_PACKAGE_JSON=$(cat package.json | base64)
+          gh api graphql -F message=$MESSAGE -F eho=`git rev-parse HEAD` -F branch=$BRANCH -F newpackage=$NEW_PACKAGE_JSON -f query='
+          mutation ($message: String!, $eho: GitObjectID!, $newpackage: String!, $branch: String!) {
+            createCommitOnBranch(input: {
+              branch: {
+                repositoryNameWithOwner: "forcedotcom/sfdx-scanner",
+                branchName: $branch
+              },
+              message: {
+                headline: $message
+              },
+              fileChanges: {
+                additions: [
+                  {
+                    path: "package.json",
+                    contents: $newpackage
+                  }
+                ]
+              },
+              expectedHeadOid: $eho
+            }) {
+              commit {
+                id
+              }
+          }'
