@@ -17,6 +17,8 @@ jobs:
       contents: write
     outputs:
       branch-name: ${{ steps.create-branch.branch_name }}
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       # checkout dev
       - uses: actions/checkout@v4
