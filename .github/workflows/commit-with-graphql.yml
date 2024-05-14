@@ -1,0 +1,43 @@
+name: commit-with-graphql
+on:
+  workflow_dispatch:
+
+jobs:
+  do-the-thing:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch --all
+      - run: git checkout d/graphql-test
+      - run: git rev-parse HEAD
+      - run: |
+          gh api graphql -F eho=`git rev-parse HEAD` -f query='
+          mutation ($eho: GitObjectID!) {
+              createCommitOnBranch(input: {
+                  branch: {
+                      repositoryNameWithOwner: "jfeingold35/gha-test-may24",
+                      branchName: "d/graphql-test"
+                  },
+                  message: {
+                      headline: "this is a headline"
+                  },
+                  fileChanges: {
+                      additions: [
+                          {
+                              path: "README.md",
+                              contents: "YXNkZmFzZGZhc2Rm"
+                          }
+                      ]
+                  },
+                  expectedHeadOid: $eho
+              }) {
+                  commit {
+                      id
+                  }
+              }
+          }
+          '

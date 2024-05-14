@@ -12,35 +12,63 @@ on:
 
 jobs:
   create-release-branch:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     permissions:
       contents: write
     outputs:
       branch-name: ${{ steps.create-branch.branch_name }}
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
-      # Checkout `dev`
+      # checkout dev
       - uses: actions/checkout@v4
       # Increment version
-      - name: Increment version
-        run: |
-          # A workflow dispatch event lets the user specify what release type they want.
+      - run: |
           if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
             RELEASE_TYPE=${{ github.event.inputs.release-type }}
-          # The regularly scheduled releases are always minor.
           else
             RELEASE_TYPE=minor
           fi
-          # Increment the version as needed
           npm --no-git-tag-version version $RELEASE_TYPE
-          git add package.json
-      # Create the new branch
-      - name: Checkout new branch, commit, push
-        id: create-branch
-        run: |
+      # Create the new branch on Github as a direct clone of `dev`
+      - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
+          git stash
+          git checkout dev
+          git pull
           git checkout -b release-$NEW_VERSION
-          git config --global user.name "botty-mc-botface"
-          git config --global user.email "botbotbot@imabot.bot"
-          git commit -m "Incrementing version for $NEW_VERSION release"
           git push --set-upstream origin release-$NEW_VERSION
-          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          git stash pop
+      - run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          MESSAGE="Incrementing version for v$NEW_VERSION release"
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          NEW_PACKAGE_JSON="$(cat package.json | base64)"
+          echo $NEW_PACKAGE_JSON
+          #NEW_PACKAGE_JSON=$(echo $NEW_PACKAGE_JSON | tr -d "\n ")
+          #echo $NEW_PACKAGE_JSON
+          gh api graphql -F message="$MESSAGE" -F eho=`git rev-parse HEAD` -F branch="$BRANCH" -F newpackage="$NEW_PACKAGE_JSON" -f query='
+          mutation ($message: String!, $eho: GitObjectID!, $newpackage: Base64String!, $branch: String!) {
+            createCommitOnBranch(input: {
+              branch: {
+                repositoryNameWithOwner: "jfeingold35/gha-test-may24",
+                branchName: $branch
+              },
+              message: {
+                headline: $message
+              },
+              fileChanges: {
+                additions: [
+                  {
+                    path: "package.json",
+                    contents: $newpackage
+                  }
+                ]
+              },
+              expectedHeadOid: $eho
+            }) {
+              commit {
+                id
+              }
+            }
+          }'

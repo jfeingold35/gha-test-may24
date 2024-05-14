@@ -1,0 +1,20 @@
+name: experiment-manual
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description: what branch
+        required: true
+
+
+jobs:
+  create-test-pr:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GHA_PAT }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh pr create -B dev -H d/t4 --title "Filler name, change name manually" --body "Merging main into dev after release"
