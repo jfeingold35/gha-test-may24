@@ -11,3 +11,4 @@ I am modifying the README a sixth time
 I am modifying the README a seventh time (in the release branch)
 I am modifying the README again (in DEV)
 BERNIE: I AM ONCE AGAIN MODIFYING (IN DEV)
+BERNIE: I AM NOT LONGER ASKING (IN DEV)
