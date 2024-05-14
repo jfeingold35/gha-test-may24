@@ -17,7 +17,7 @@ jobs:
   create-main-to-dev-pr:
     needs: pretend-to-release
     env:
-      GH_TOKEN: $github.token
+      GH_TOKEN: ${{ github.token }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
