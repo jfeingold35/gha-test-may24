@@ -24,4 +24,4 @@ jobs:
           I am trying hard to create multiline strings.\n\
           - list item 1\n\
           - list item 2"
-          gh pr create -b dev -h main --title "Filler name" --body "$PR_BODY"
+          gh pr create -B dev -H main --title "Filler name" --body "$PR_BODY"
