@@ -17,4 +17,11 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - run: gh pr create -B dev -H d/t4 --title "Filler name, change name manually" --body "Merging main into dev after release"
+      - run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          PR_BODY="This PR was created automatically. I am testing stuff. \
+          The current package.version is $NEW_VERSION.\n\
+          I am trying hard to create multiline strings.\n\
+          - list item 1\n\
+          - list item 2"
+          gh pr create -b dev -h main --title "Filler name" --body "$PR_BODY"
