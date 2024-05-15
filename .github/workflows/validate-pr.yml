@@ -2,6 +2,7 @@ name: validate-pr
 on:
   pull_request:
     types: [edited, opened, reopened, synchronize]
+  workflow_call:
 
 jobs:
   do-the-thing:
