@@ -33,5 +33,4 @@ jobs:
       - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           gh pr create -B dev -H m2d/v$NEW_VERSION --title "FILLER TITLE" --body "filler body"
-  perform-pr-validation:
-    uses: ./.github/workflows/validate-pr.yml
+          gh pr merge --auto -m
