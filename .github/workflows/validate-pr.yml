@@ -1,0 +1,12 @@
+name: validate-pr
+on:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+
+jobs:
+  do-the-thing:
+    runs-on: macos-latest
+    steps:
+      - run: echo beep boop bop
+      - run: sleep 10
+      - run: echo beep boop bop again
