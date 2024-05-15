@@ -30,38 +30,8 @@ jobs:
           NEW_VERSION=$(jq -r ".version" package.json)
           git checkout -b m2d/v$NEW_VERSION
           git push --set-upstream origin m2d/v$NEW_VERSION
-      - run: gh pr create -B dev -H main --title "FILLER NAME, READ BODY FOR INFO" \
-          --body "This branch and PR were automatically created following the v$NEW_VERSION release.
-          It must be MERGED into dev, NOT SQUASHED, NOT REBASED. If you do a Squash or Rebase, it will cause irreconcilable
-          conflicts between main and dev, and someone's day will be ruined.
-          If there are conflicts between this branch and dev, you should do the following locally,
-          - $ git checkout dev
-          - $ git pull
-          - $ git fetch --all
-          - $ git checkout m2d/v$NEW_VERSION
-          - $ git pull origin dev --no-rebase
-          - Resolve the merge conflicts manually. When in doubt, ask the code's author for help.
-          - $ git commit
-          - $ git push"
-
-
-
-#  merge-main-to-dev:
-#    needs: pretend-to-release
-#    permissions:
-#      contents: write
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - run: |
-#          git fetch --all
-#          git checkout main
-#          git config --global user.name "botty-mc-botface"
-#          git config --global user.email "botbotbot@imabot.bot"
-#          git pull
-#          git checkout dev
-#          git pull
-#          git pull origin main --rebase
-#          git push --force
-#
-#
+      - run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          gh pr create -B dev -H m2d/v$NEW_VERSION --title "FILLER TITLE" --body "filler body"
+          gh pr merge -m
+          
