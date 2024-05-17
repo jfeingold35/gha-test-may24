@@ -32,4 +32,5 @@ jobs:
             asdfasdf
             asdfasdf
           token: ${{ secrets.GHA_PAT }}
+          files: package.json
           make_latest: true
