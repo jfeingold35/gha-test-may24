@@ -44,7 +44,6 @@ jobs:
           body: |
             asdfasdf
             asdfasdf
-          token: ${{ secrets.GHA_PAT }}
           files: |
             package.json
             *.txt
