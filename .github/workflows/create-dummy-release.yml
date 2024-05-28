@@ -6,7 +6,7 @@ on:
       - main
     types:
       - close
-  workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   create-artifact:
