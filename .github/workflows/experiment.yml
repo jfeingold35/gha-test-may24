@@ -30,14 +30,14 @@ jobs:
             RELEASE_TYPE=minor
           fi
           npm --no-git-tag-version version $RELEASE_TYPE
-      # Create the new branch on Github as a direct clone of `dev`
+      # Create the interim branch on Github as a direct clone of `dev`
       - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           git stash
           git checkout dev
           git pull
-          git checkout -b release-$NEW_VERSION
-          git push --set-upstream origin release-$NEW_VERSION
+          git checkout -b ${NEW_VERSION}-interim
+          git push --set-upstream origin ${NEW_VERSION}-interim
           git stash pop
       - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
@@ -72,3 +72,7 @@ jobs:
               }
             }
           }'
+      - run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          git checkout -b release-$NEW_VERSION
+          git push --set-upstream origin release-$NEW_VERSION
