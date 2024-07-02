@@ -53,55 +53,41 @@ jobs:
           git checkout -b $INTERIM_BRANCH_NAME
           # Immediately push the interim branch with no changes, so GraphQL can push to it later.
           git push --set-upstream origin $INTERIM_BRANCH_NAME
-      # Update dependencies.
-      - run: |
-          yarn upgrade
-          node tools/UpdateRetireJsVulns.js
       # Use the GraphQL API to create a signed commit with the various changes.
       - name: Commit to interim branch
         run: |
-          # GraphQL needs to know what branch to push to.
-          BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          # GraphQL needs a message for the commit.
           NEW_VERSION=$(jq -r ".version" package.json)
-          MESSAGE="Preparing for v$NEW_VERSION release."
-          # GraphQL needs the latest versions of the files we changed, as Base64 encoded strings.
-          NEW_PACKAGE="$(cat package.json | base64)"
-          NEW_YARN_LOCK="$(cat yarn.lock | base64)"
-          NEW_RETIREJS_VULNS="$(cat retire-js/RetireJsVulns.json | base64)"
-          gh api graphql -F message="$MESSAGE" -F oldOid=`git rev-parse HEAD` -F branch="$BRANCH" \
-          -F newPackage="$NEW_PACKAGE" -F newYarnLock="$NEW_YARN_LOCK" -F newRetireJsVulns="$NEW_RETIREJS_VULNS" \
-          -f query='
-            mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!, $newYarnLock: Base64String!, $newRetireJsVulns: Base64String!) {
-              createCommitOnBranch(input: {
-                branch: {
-                  repositoryNameWithOwner: "jfeingold35/gha-test-may24",
-                  branchName: $branch
-                },
-                message: {
-                  headline: $message
-                },
-                fileChanges: {
-                  additions: [
-                    {
-                      path: "package.json",
-                      contents: $newPackage
-                    }, {
-                      path: "yarn.lock",
-                      contents: $newYarnLock
-                    }, {
-                      path: "retire-js/RetireJsVulns.json",
-                      contents: $newRetireJsVulns
-                    }
-                  ]
-                },
-                expectedHeadOid: $oldOid
-              }) {
-                commit {
-                  id
-                }
+          MESSAGE="Incrementing version for v$NEW_VERSION release"
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          NEW_PACKAGE_JSON="$(cat package.json | base64)"
+          echo $NEW_PACKAGE_JSON
+          #NEW_PACKAGE_JSON=$(echo $NEW_PACKAGE_JSON | tr -d "\n ")
+          #echo $NEW_PACKAGE_JSON
+          gh api graphql -F message="$MESSAGE" -F eho=`git rev-parse HEAD` -F branch="$BRANCH" -F newpackage="$NEW_PACKAGE_JSON" -f query='
+          mutation ($message: String!, $eho: GitObjectID!, $newpackage: Base64String!, $branch: String!) {
+            createCommitOnBranch(input: {
+              branch: {
+                repositoryNameWithOwner: "jfeingold35/gha-test-may24",
+                branchName: $branch
+              },
+              message: {
+                headline: $message
+              },
+              fileChanges: {
+                additions: [
+                  {
+                    path: "package.json",
+                    contents: $newpackage
+                  }
+                ]
+              },
+              expectedHeadOid: $eho
+            }) {
+              commit {
+                id
               }
-            }'
+            }
+          }'
       # Now that we've done our bookkeeping commits on the interim branch, use it as the base for the real release branch.
       - name: Create release branch
         id: create-branch
