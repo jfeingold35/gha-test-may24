@@ -99,3 +99,4 @@ jobs:
           git push --set-upstream origin release-$NEW_VERSION
           # Output the branch name so we can use it in later jobs.
           echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          git push -d origin ${NEW_VERSION}-interim
