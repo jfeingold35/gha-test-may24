@@ -13,7 +13,7 @@ jobs:
   pretend-to-release:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "definitely did a release"
+      - run: echo "definitely did a release via v5"
   create-main-to-dev-pr:
     needs: pretend-to-release
     env:

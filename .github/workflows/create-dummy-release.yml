@@ -3,7 +3,7 @@ name: create-dummy-release
 on:
   pull_request:
     branches:
-      - main
+      - main-5
     types:
       - closed
   workflow_dispatch:
