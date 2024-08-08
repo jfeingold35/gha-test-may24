@@ -23,7 +23,7 @@ jobs:
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: experiment.yml,
+              workflow_id: 'experiment.yml',
               ref: dev-5
             });
   create-release-branch:
