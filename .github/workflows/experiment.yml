@@ -11,35 +11,66 @@ on:
           - patch
 
 jobs:
+  create-alpha-release-branch:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GHA_PAT }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'experiment.yml',
+              ref: 'dev-5'
+            });
   create-release-branch:
     runs-on: macos-latest
     permissions:
       contents: write
     outputs:
-      branch-name: ${{ steps.create-branch.branch_name }}
+      branch-name: ${{ steps.create-branch.outputs.branch_name }}
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      # checkout dev
+      # Checkout `dev`
       - uses: actions/checkout@v4
-      # Increment version
-      - run: |
+        with:
+          ref: 'dev'
+      # We need to set up Node and install our Node dependencies.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*' # Always use Node LTS for building dependencies.
+      - run: yarn
+      # Increment the version as desired locally, without actually commiting anything.
+      - name: Locally increment version
+        run: |
+          # A workflow dispatch event lets the user specify what release type they want.
           if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
             RELEASE_TYPE=${{ github.event.inputs.release-type }}
+          # The regularly scheduled releases are always minor.
           else
             RELEASE_TYPE=minor
           fi
+          # Increment the version as needed.
           npm --no-git-tag-version version $RELEASE_TYPE
-      # Create the new branch on Github as a direct clone of `dev`
-      - run: |
+      # The branch protection rule for `release-x.y.z` branches prevents pushing commits directly. To work around this,
+      # we create an interim branch that we _can_ push commits to, and we'll do our version bookkeeping in that branch
+      # instead.
+      - id: create-interim-branch
+        name: Create interim branch
+        run: |
           NEW_VERSION=$(jq -r ".version" package.json)
-          git stash
-          git checkout dev
-          git pull
-          git checkout -b release-$NEW_VERSION
-          git push --set-upstream origin release-$NEW_VERSION
-          git stash pop
-      - run: |
+          INTERIM_BRANCH_NAME=${NEW_VERSION}-interim
+          # Create and check out the interim branch.
+          git checkout -b $INTERIM_BRANCH_NAME
+          # Immediately push the interim branch with no changes, so GraphQL can push to it later.
+          git push --set-upstream origin $INTERIM_BRANCH_NAME
+      # Use the GraphQL API to create a signed commit with the various changes.
+      - name: Commit to interim branch
+        run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           MESSAGE="Incrementing version for v$NEW_VERSION release"
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -72,3 +103,15 @@ jobs:
               }
             }
           }'
+      # Now that we've done our bookkeeping commits on the interim branch, use it as the base for the real release branch.
+      - name: Create release branch
+        id: create-branch
+        run: |
+          git checkout -- .
+          git pull
+          NEW_VERSION=$(jq -r ".version" package.json)
+          git checkout -b release-$NEW_VERSION
+          git push --set-upstream origin release-$NEW_VERSION
+          # Output the branch name so we can use it in later jobs.
+          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          git push -d origin ${NEW_VERSION}-interim
