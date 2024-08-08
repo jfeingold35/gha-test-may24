@@ -41,6 +41,7 @@ jobs:
         with:
           tag_name: v${{ steps.get-version-property.outputs.package_version }}
           name: v${{ steps.get-version-property.outputs.package_version }}
+          token: ${{ secrets.GHA_PAT }}
           body: |
             asdfasdf
             asdfasdf
