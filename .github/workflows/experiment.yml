@@ -11,6 +11,21 @@ on:
           - patch
 
 jobs:
+  create-alpha-release-branch:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GHA_PAT }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner
+              repo: context.repo.repo
+              workflow_id: experiment.yml
+              ref: dev-5
+            });
   create-release-branch:
     runs-on: macos-latest
     permissions:
