@@ -27,7 +27,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: main-5
       - name: Get version property
         id: get-version-property
         run: |
